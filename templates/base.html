@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Consilium Events{% endblock %}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --green-primary: #8CBF70;
+            --green-secondary: #9DDECA;
+            --yellow-primary: #FFEA4A;
+            --yellow-secondary: #FFD381;
+            --red-primary: #FF7E93;
+            --red-secondary: #FFAFD2;
+            --blue-primary: #6CBBDF;
+            --blue-secondary: #9BC3FF;
+            --gray-primary: #DBDBDB;
+            --gray-secondary: #BEBEBE;
+            --dark-bg: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Стилизованный заголовок с брендбука */
+        .brand-heading {
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+        }
+        
+        /* Навигация */
+        header {
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover .logo-symbol {
+            transform: rotate(180deg);
+        }
+        
+        .logo-symbol {
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle at center, transparent 35%, var(--green-primary) 40%, var(--green-primary) 60%, transparent 65%);
+            border-radius: 50%;
+            position: relative;
+            filter: blur(1px);
+            transition: transform 0.6s ease;
+        }
+        
+        .logo-symbol::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: var(--dark-bg);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+        
+        /* Навигация с иконками */
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        nav a:hover {
+            color: var(--green-primary);
+            transform: translateY(-2px);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+        
+        /* Кнопки с градиентами */
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+            color: var(--dark-bg);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(140, 191, 112, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--green-primary);
+            color: var(--green-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--green-primary);
+            color: var(--dark-bg);
+        }
+        
+        /* Плашки из брендбука */
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(140, 191, 112, 0.2);
+            color: var(--green-primary);
+            border: 1px solid var(--green-primary);
+        }
+        
+        .badge-yellow {
+            background: rgba(255, 234, 74, 0.2);
+            color: var(--yellow-primary);
+            border-color: var(--yellow-primary);
+        }
+        
+        .badge-blue {
+            background: rgba(108, 187, 223, 0.2);
+            color: var(--blue-primary);
+            border-color: var(--blue-primary);
+        }
+        
+        .badge-red {
+            background: rgba(255, 126, 147, 0.2);
+            color: var(--red-primary);
+            border-color: var(--red-primary);
+        }
+        
+        /* Иконки из брендбука */
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--green-primary);
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-box:hover {
+            background: var(--green-primary);
+            color: var(--dark-bg);
+            transform: scale(1.1);
+        }
+        
+        /* Градиентные фоны */
+        .gradient-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.15;
+        }
+        
+        .gradient-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .gradient-circle.green {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--green-primary), transparent);
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+        
+        .gradient-circle.blue {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--blue-primary), transparent);
+            bottom: 20%;
+            right: 15%;
+            animation-delay: 5s;
+        }
+        
+        .gradient-circle.yellow {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--yellow-primary), transparent);
+            top: 50%;
+            left: 50%;
+            animation-delay: 10s;
+        }
+        
+        .gradient-circle.red {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--red-primary), transparent);
+            top: 30%;
+            right: 30%;
+            animation-delay: 15s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -50px) scale(1.1); }
+            50% { transform: translate(-50px, 50px) scale(0.9); }
+            75% { transform: translate(30px, 30px) scale(1.05); }
+        }
+        
+        /* Карточки с плашками */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green-primary), var(--blue-primary), var(--yellow-primary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(140, 191, 112, 0.5);
+            box-shadow: 0 20px 40px rgba(140, 191, 112, 0.1);
+        }
+        
+        /* Основной контент */
+        main {
+            margin-top: 100px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Футер */
+        footer {
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.9));
+            padding: 80px 0 40px;
+            margin-top: 100px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--green-primary);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-section a {
+            color: var(--gray-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section a:hover {
+            color: var(--green-primary);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--gray-secondary);
+        }
+        
+        /* Мобильное меню */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 28px;
+            cursor: pointer;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 20px;
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.98);
+                padding: 30px;
+                border-radius: 15px;
+                display: none;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg">
+        <div class="gradient-circle green"></div>
+        <div class="gradient-circle blue"></div>
+        <div class="gradient-circle yellow"></div>
+        <div class="gradient-circle red"></div>
+    </div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <div class="logo-symbol"></div>
+                    <span class="logo-text">Консилиум</span>
+                </a>
+                <nav>
+                    <button class="mobile-menu-toggle" onclick="toggleMenu()">☰</button>
+                    <ul id="nav-menu">
+                        <li>
+                            <a href="/">
+                                <span class="nav-icon">🏠</span>
+                                <span>Главная</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/events">
+                                <span class="nav-icon">📅</span>
+                                <span>Ивенты</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/community">
+                                <span class="nav-icon">👥</span>
+                                <span>Сообщество</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/about">
+                                <span class="nav-icon">💡</span>
+                                <span>О проекте</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Consilium</h4>
+                    <p style="color: var(--gray-primary); margin-bottom: 20px;">Для тех, кто ищет ответы</p>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="icon-box" style="width: 40px; height: 40px;">
+                            <span>📱</span>
+                        </div>
+                        <div class="icon-box" style="width: 40px; height: 40px;">
+                            <span>💬</span>
+                        </div>
+                        <div class="icon-box" style="width: 40px; height: 40px;">
+                            <span>🎧</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="/events">Все ивенты</a></li>
+                        <li><a href="/community">Сообщество</a></li>
+                        <li><a href="/about">О проекте</a></li>
+                        <li><a href="#app">Скачать приложение</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Категории</h4>
+                    <ul>
+                        <li><a href="/events?category=self-acceptance">Принятие себя</a></li>
+                        <li><a href="/events?category=meditation">Медитации</a></li>
+                        <li><a href="/events?category=transformation">Трансформация</a></li>
+                        <li><a href="/events?category=inspiration">Вдохновение</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Присоединяйтесь</h4>
+                    <p style="color: var(--gray-primary); margin-bottom: 20px;">Станьте частью сообщества искателей</p>
+                    <a href="#" class="btn" style="display: inline-block;">Скачать приложение</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Consilium. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('active');
+        }
+        
+        // Анимация при скролле
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(0, 0, 0, 0.95)';
+            } else {
+                header.style.background = 'rgba(0, 0, 0, 0.9)';
+            }
+        });
+    </script>
+</body>
+</html>

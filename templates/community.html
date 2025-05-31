@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+
+{% block title %}Сообщество - Consilium{% endblock %}
+
+{% block content %}
+<style>
+    .community-hero {
+        padding: 80px 0;
+        text-align: center;
+        background: linear-gradient(180deg, transparent, var(--dark-secondary));
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .community-hero::before {
+        content: '';
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(140, 191, 112, 0.2) 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        filter: blur(80px);
+    }
+    
+    .community-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary), var(--yellow-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .community-subtitle {
+        font-size: 1.3rem;
+        color: var(--gray-primary);
+        max-width: 600px;
+        margin: 0 auto 40px;
+    }
+    
+    .community-stats {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        margin-top: 50px;
+    }
+    
+    .community-stat {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--green-primary);
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: var(--gray-secondary);
+        font-size: 1rem;
+    }
+    
+    .members-section {
+        padding: 80px 0;
+    }
+    
+    .members-mosaic {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 15px;
+        margin: 50px 0;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .member-avatar-small {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--dark-bg);
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .member-avatar-small:nth-child(even) {
+        background: linear-gradient(135deg, var(--blue-primary), var(--yellow-primary));
+    }
+    
+    .member-avatar-small:nth-child(3n) {
+        background: linear-gradient(135deg, var(--yellow-primary), var(--red-primary));
+    }
+    
+    .member-avatar-small:hover {
+        transform: scale(1.2);
+        z-index: 10;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stories-section {
+        padding: 100px 0;
+        background: var(--dark-secondary);
+    }
+    
+    .story-carousel {
+        margin-top: 60px;
+        position: relative;
+    }
+    
+    .story-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 50px;
+        border-radius: 30px;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+        position: relative;
+    }
+    
+    .story-quote {
+        font-size: 1.5rem;
+        line-height: 1.8;
+        margin-bottom: 40px;
+        color: var(--text-light);
+        font-style: italic;
+    }
+    
+    .story-author {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .story-avatar {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--dark-bg);
+        font-size: 1.5rem;
+    }
+    
+    .story-info {
+        text-align: left;
+    }
+    
+    .story-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .story-details {
+        color: var(--gray-secondary);
+    }
+    
+    .carousel-nav {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 40px;
+    }
+    
+    .carousel-dot {
+        width: 10px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .carousel-dot.active {
+        background: var(--green-primary);
+        width: 30px;
+        border-radius: 5px;
+    }
+    
+    .activities-section {
+        padding: 100px 0;
+    }
+    
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 40px;
+        margin-top: 60px;
+    }
+    
+    .activity-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 25px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--green-primary);
+        box-shadow: 0 30px 60px rgba(140, 191, 112, 0.1);
+    }
+    
+    .activity-image {
+        height: 200px;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .activity-image::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .activity-card:hover .activity-image::before {
+        opacity: 1;
+    }
+    
+    .activity-content {
+        padding: 30px;
+    }
+    
+    .activity-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--text-light);
+    }
+    
+    .activity-description {
+        color: var(--gray-primary);
+        line-height: 1.8;
+        margin-bottom: 20px;
+    }
+    
+    .activity-stats {
+        display: flex;
+        gap: 20px;
+        color: var(--gray-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .guidelines-section {
+        padding: 100px 0;
+        background: var(--dark-secondary);
+    }
+    
+    .guidelines-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 60px;
+    }
+    
+    .guideline-card {
+        padding: 35px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .guideline-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .guideline-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 20px;
+        background: rgba(140, 191, 112, 0.2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+    }
+    
+    .guideline-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--green-primary);
+    }
+    
+    .guideline-text {
+        color: var(--gray-primary);
+        line-height: 1.6;
+    }
+    
+    .join-section {
+        padding: 120px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .join-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: radial-gradient(ellipse at center, rgba(140, 191, 112, 0.1) 0%, transparent 70%);
+        z-index: -1;
+    }
+    
+    .join-content h2 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+    }
+    
+    .join-benefits {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        max-width: 800px;
+        margin: 50px auto;
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .benefit-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(140, 191, 112, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--green-primary);
+    }
+    
+    @media (max-width: 768px) {
+        .community-title {
+            font-size: 2.5rem;
+        }
+        
+        .community-stats {
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .members-mosaic {
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+        }
+        
+        .member-avatar-small {
+            width: 50px;
+            height: 50px;
+            font-size: 1rem;
+        }
+        
+        .story-card {
+            padding: 30px;
+        }
+        
+        .story-quote {
+            font-size: 1.2rem;
+        }
+        
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="community-hero">
+    <div class="container">
+        <h1 class="community-title brand-heading">Наше сообщество</h1>
+        <p class="community-subtitle">Тысячи людей, объединенных поиском ответов и стремлением к росту</p>
+        
+        <div class="community-stats">
+            <div class="community-stat">
+                <div class="stat-number">{{ stats.total_users | default(14127) }}</div>
+                <div class="stat-label">Участников</div>
+            </div>
+            <div class="community-stat">
+                <div class="stat-number">{{ stats.cities | default(12) }}</div>
+                <div class="stat-label">Городов</div>
+            </div>
+            <div class="community-stat">
+                <div class="stat-number">{{ stats.events_held | default(89) }}</div>
+                <div class="stat-label">Встреч проведено</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="members-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Лица сообщества</h2>
+            <p class="section-subtitle">Каждый участник — уникальная история</p>
+        </div>
+        
+        <div class="members-mosaic">
+            {% for i in range(48) %}
+            <div class="member-avatar-small">{{ ['АБ', 'ВГ', 'ДЕ', 'ЖЗ', 'ИК', 'ЛМ', 'НО', 'ПР', 'СТ', 'УФ', 'ХЦ', 'ЧШ'][i % 12] }}</div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center;">
+            <p style="color: var(--gray-primary);">И еще {{ stats.total_users - 48 }} человек по всей стране</p>
+        </div>
+    </div>
+</section>
+
+<section class="stories-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Истории участников</h2>
+            <p class="section-subtitle">Как Consilium изменил их жизнь</p>
+        </div>
+        
+        <div class="story-carousel">
+            <div class="story-card">
+                <p class="story-quote">"Благодаря Consilium я поняла, что не одинока в своих переживаниях. Здесь я нашла поддержку и научилась принимать себя такой, какая я есть."</p>
+                <div class="story-author">
+                    <div class="story-avatar">МП</div>
+                    <div class="story-info">
+                        <div class="story-name">Мария Петрова</div>
+                        <div class="story-details">Участница с 2023 года • Москва</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="carousel-nav">
+                <div class="carousel-dot active"></div>
+                <div class="carousel-dot"></div>
+                <div class="carousel-dot"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="activities-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Активности сообщества</h2>
+            <p class="section-subtitle">Разные форматы для глубокого взаимодействия</p>
+        </div>
+        
+        <div class="activities-grid">
+            <div class="activity-card">
+                <div class="activity-image">🎙️</div>
+                <div class="activity-content">
+                    <h3 class="activity-title">Аудиокомнаты</h3>
+                    <p class="activity-description">Онлайн-обсуждения в приложении, где каждый может высказаться и быть услышанным</p>
+                    <div class="activity-stats">
+                        <span>📅 3-4 раза в неделю</span>
+                        <span>👥 До 100 участников</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="activity-card">
+                <div class="activity-image">🏢</div>
+                <div class="activity-content">
+                    <h3 class="activity-title">Офлайн-встречи</h3>
+                    <p class="activity-description">Живые обсуждения в уютных пространствах городов России</p>
+                    <div class="activity-stats">
+                        <span>📍 12 городов</span>
+                        <span>🎯 20-50 человек</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="activity-card">
+                <div class="activity-image">📝</div>
+                <div class="activity-content">
+                    <h3 class="activity-title">Дневники роста</h3>
+                    <p class="activity-description">Персональные записи с поддержкой AI для отслеживания внутренних изменений</p>
+                    <div class="activity-stats">
+                        <span>🔒 Приватно</span>
+                        <span>✨ С AI-инсайтами</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="guidelines-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Принципы сообщества</h2>
+            <p class="section-subtitle">Правила, которые делают наше пространство безопасным</p>
+        </div>
+        
+        <div class="guidelines-grid">
+            <div class="guideline-card">
+                <div class="guideline-icon">🤐</div>
+                <h3 class="guideline-title">Конфиденциальность</h3>
+                <p class="guideline-text">Все, что происходит на встречах, остается между участниками</p>
+            </div>
+            
+            <div class="guideline-card">
+                <div class="guideline-icon">🚫</div>
+                <h3 class="guideline-title">Без осуждения</h3>
+                <p class="guideline-text">Мы принимаем опыт каждого без критики и оценок</p>
+            </div>
+            
+            <div class="guideline-card">
+                <div class="guideline-icon">👂</div>
+                <h3 class="guideline-title">Активное слушание</h3>
+                <p class="guideline-text">Даем возможность высказаться каждому и внимательно слушаем</p>
+            </div>
+            
+            <div class="guideline-card">
+                <div class="guideline-icon">💚</div>
+                <h3 class="guideline-title">Эмпатия</h3>
+                <p class="guideline-text">Относимся друг к другу с пониманием и состраданием</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Отзывы участников</h2>
+            <p class="section-subtitle">Что говорят о нас</p>
+        </div>
+        
+        <div class="testimonials-grid">
+            {% for testimonial in testimonials %}
+            <div class="testimonial-card">
+                <div class="quote-icon">"</div>
+                <p class="testimonial-text">{{ testimonial.text }}</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">{{ testimonial.author[:2] }}</div>
+                    <div class="author-info">
+                        <div class="author-name">{{ testimonial.author }}</div>
+                        <div class="author-event">Участник ивента "{{ testimonial.event }}"</div>
+                    </div>
+                    <div class="rating">
+                        {% for i in range(testimonial.rating) %}
+                        <span>⭐</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="join-section">
+    <div class="join-bg"></div>
+    <div class="container">
+        <div class="join-content">
+            <h2 class="brand-heading">Станьте частью сообщества</h2>
+            <p style="font-size: 1.3rem; color: var(--gray-primary); margin-bottom: 40px;">Присоединяйтесь к тысячам людей, которые уже нашли свой путь</p>
+            
+            <div class="join-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon">✅</div>
+                    <span>Бесплатное участие</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✅</div>
+                    <span>Анонимность</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✅</div>
+                    <span>Поддержка 24/7</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">✅</div>
+                    <span>Доступ к ивентам</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 50px;">
+                <a href="#" class="btn" style="font-size: 1.1rem; padding: 15px 40px;">Скачать приложение</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Анимация мозаики участников
+    const avatars = document.querySelectorAll('.member-avatar-small');
+    avatars.forEach((avatar, index) => {
+        avatar.style.opacity = '0';
+        avatar.style.transform = 'scale(0)';
+        setTimeout(() => {
+            avatar.style.transition = 'all 0.3s ease';
+            avatar.style.opacity = '1';
+            avatar.style.transform = 'scale(1)';
+        }, index * 20);
+    });
+    
+    // Карусель историй
+    let currentStory = 0;
+    const dots = document.querySelectorAll('.carousel-dot');
+    const stories = [
+        {
+            quote: "Благодаря Consilium я поняла, что не одинока в своих переживаниях. Здесь я нашла поддержку и научилась принимать себя такой, какая я есть.",
+            name: "Мария Петрова",
+            details: "Участница с 2023 года • Москва"
+        },
+        {
+            quote: "Каждый ивент - это возможность посмотреть на свои проблемы под другим углом. Истории других людей помогают найти свои ответы.",
+            name: "Александр Иванов",
+            details: "Участник с 2022 года • Санкт-Петербург"
+        },
+        {
+            quote: "В Consilium я научилась не бояться быть уязвимой. Это сообщество показало мне, что в открытости есть огромная сила.",
+            name: "Елена Смирнова",
+            details: "Участница с 2023 года • Екатеринбург"
+        }
+    ];
+    
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentStory = index;
+            updateCarousel();
+        });
+    });
+    
+    function updateCarousel() {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[currentStory].classList.add('active');
+        
+        const storyCard = document.querySelector('.story-card');
+        storyCard.style.opacity = '0';
+        
+        setTimeout(() => {
+            const story = stories[currentStory];
+            storyCard.querySelector('.story-quote').textContent = `"${story.quote}"`;
+            storyCard.querySelector('.story-name').textContent = story.name;
+            storyCard.querySelector('.story-details').textContent = story.details;
+            storyCard.querySelector('.story-avatar').textContent = story.name.split(' ').map(n => n[0]).join('');
+            storyCard.style.opacity = '1';
+        }, 300);
+    }
+    
+    // Автопрокрутка каждые 5 секунд
+    setInterval(() => {
+        currentStory = (currentStory + 1) % stories.length;
+        updateCarousel();
+    }, 5000);
+</script>
+
+{% endblock %}

@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Все ивенты - Consilium{% endblock %}
+
+{% block content %}
+<style>
+    .events-hero {
+        padding: 80px 0 60px;
+        text-align: center;
+        background: linear-gradient(180deg, transparent, var(--dark-secondary));
+    }
+    
+    .events-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .filter-section {
+        padding: 40px 0;
+        background: var(--dark-secondary);
+        position: sticky;
+        top: 80px;
+        z-index: 100;
+        backdrop-filter: blur(20px);
+    }
+    
+    .filter-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .category-filters {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 10px 25px;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        color: var(--gray-primary);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .filter-btn:hover {
+        border-color: var(--green-primary);
+        color: var(--green-primary);
+    }
+    
+    .filter-btn.active {
+        background: var(--green-primary);
+        color: var(--dark-bg);
+        border-color: var(--green-primary);
+    }
+    
+    .filter-icon {
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px 20px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        width: 300px;
+    }
+    
+    .search-box input {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        outline: none;
+        flex: 1;
+        font-size: 1rem;
+    }
+    
+    .search-box input::placeholder {
+        color: var(--gray-secondary);
+    }
+    
+    .events-content {
+        padding: 60px 0;
+    }
+    
+    .events-masonry {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+    }
+    
+    .event-card-extended {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 25px;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .event-card-extended:hover {
+        transform: translateY(-8px);
+        border-color: var(--green-primary);
+        box-shadow: 0 30px 60px rgba(140, 191, 112, 0.15);
+    }
+    
+    .event-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .event-image::before {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        top: -25%;
+        left: -25%;
+        animation: float 10s infinite ease-in-out;
+    }
+    
+    .event-badges {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .event-content {
+        padding: 30px;
+    }
+    
+    .event-meta {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: var(--gray-secondary);
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .event-title {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        color: var(--text-light);
+        font-weight: 600;
+    }
+    
+    .event-author {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .event-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .tag {
+        padding: 5px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        font-size: 0.85rem;
+        color: var(--gray-primary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .event-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .event-date-full {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .calendar-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(140, 191, 112, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--green-primary);
+        font-weight: 700;
+        border: 1px solid var(--green-primary);
+    }
+    
+    .load-more {
+        text-align: center;
+        margin-top: 60px;
+    }
+    
+    .stats-banner {
+        background: linear-gradient(135deg, rgba(140, 191, 112, 0.1), rgba(108, 187, 223, 0.1));
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 60px;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+    
+    .stat-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--green-primary);
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: var(--gray-primary);
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 100px 20px;
+    }
+    
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    .empty-title {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: var(--gray-primary);
+    }
+    
+    .empty-subtitle {
+        color: var(--gray-secondary);
+    }
+    
+    @media (max-width: 768px) {
+        .events-hero h1 {
+            font-size: 2.5rem;
+        }
+        
+        .filter-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-box {
+            width: 100%;
+        }
+        
+        .category-filters {
+            justify-content: center;
+        }
+        
+        .events-masonry {
+            grid-template-columns: 1fr;
+        }
+        
+        .filter-section {
+            position: static;
+        }
+    }
+</style>
+
+<div class="events-hero">
+    <div class="container">
+        <h1 class="brand-heading">Все ивенты</h1>
+        <p style="font-size: 1.2rem; color: var(--gray-primary);">Найдите обсуждение, которое откликается в вашей душе</p>
+    </div>
+</div>
+
+<div class="filter-section">
+    <div class="container">
+        <div class="filter-container">
+            <div class="category-filters">
+                <a href="/events?category=all" class="filter-btn {% if current_category == 'all' %}active{% endif %}">
+                    <span class="filter-icon">✨</span>
+                    <span>Все категории</span>
+                </a>
+                <a href="/events?category=self-acceptance" class="filter-btn {% if current_category == 'self-acceptance' %}active{% endif %}">
+                    <span class="filter-icon">🤝</span>
+                    <span>Принятие себя</span>
+                </a>
+                <a href="/events?category=meditation" class="filter-btn {% if current_category == 'meditation' %}active{% endif %}">
+                    <span class="filter-icon">🧘</span>
+                    <span>Медитация</span>
+                </a>
+                <a href="/events?category=transformation" class="filter-btn {% if current_category == 'transformation' %}active{% endif %}">
+                    <span class="filter-icon">🦋</span>
+                    <span>Трансформация</span>
+                </a>
+                <a href="/events?category=inspiration" class="filter-btn {% if current_category == 'inspiration' %}active{% endif %}">
+                    <span class="filter-icon">💡</span>
+                    <span>Вдохновение</span>
+                </a>
+            </div>
+            
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" placeholder="Поиск по ивентам..." id="search-events">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="events-content">
+    <div class="container">
+        <!-- Статистика -->
+        <div class="stats-banner">
+            <h2 style="font-size: 2rem; margin-bottom: 10px;">Наше сообщество растет</h2>
+            <p style="color: var(--gray-primary);">Присоединяйтесь к тысячам искателей по всей стране</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">{{ events|length }}</div>
+                    <div class="stat-label">Активных ивентов</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Городов</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">14k+</div>
+                    <div class="stat-label">Участников</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">89</div>
+                    <div class="stat-label">Проведено встреч</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Сетка ивентов -->
+        {% if events %}
+        <div class="events-masonry">
+            {% for event in events %}
+            <div class="event-card-extended" data-category="{{ event.category }}">
+                <div class="event-image">
+                    <div class="event-badges">
+                        {% if event.status == 'upcoming' %}
+                            <span class="badge">Предстоящий</span>
+                        {% else %}
+                            <span class="badge badge-gray">Завершен</span>
+                        {% endif %}
+                        
+                        {% if event.category == 'self-acceptance' %}
+                            <span class="badge badge-green">Принятие себя</span>
+                        {% elif event.category == 'meditation' %}
+                            <span class="badge badge-blue">Медитация</span>
+                        {% elif event.category == 'transformation' %}
+                            <span class="badge badge-yellow">Трансформация</span>
+                        {% elif event.category == 'inspiration' %}
+                            <span class="badge badge-red">Вдохновение</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="event-content">
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span>❤️</span>
+                            <span>{{ event.likes }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👥</span>
+                            <span>{{ event.participants }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📍</span>
+                            <span>{{ event.location.split(',')[0] }}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="event-title">{{ event.post_text }}</h3>
+                    
+                    <div class="event-author">
+                        <div class="author-avatar">{{ event.author[0] }}</div>
+                        <div>
+                            <div style="font-weight: 600;">{{ event.author }}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-secondary);">Автор темы</div>
+                        </div>
+                    </div>
+                    
+                    {% if event.tags %}
+                    <div class="event-tags">
+                        {% for tag in event.tags[:3] %}
+                        <span class="tag">#{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="event-actions">
+                        <div class="event-date-full">
+                            <div class="calendar-icon">{{ event.event_date.day }}</div>
+                            <div>
+                                <div style="font-weight: 600;">{{ event.event_date.strftime('%d %B') }}</div>
+                                <div style="font-size: 0.85rem; color: var(--gray-secondary);">{{ event.event_date.strftime('%H:%M') }}</div>
+                            </div>
+                        </div>
+                        <a href="/event/{{ event.id }}" class="btn" style="padding: 10px 25px;">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="load-more">
+            <button class="btn btn-secondary" onclick="loadMore()">Загрузить еще</button>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3 class="empty-title">Ивенты не найдены</h3>
+            <p class="empty-subtitle">Попробуйте изменить фильтры или вернитесь позже</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Поиск по ивентам
+    document.getElementById('search-events').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.event-card-extended');
+        
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+    
+    // Загрузить еще
+    function loadMore() {
+        // Здесь будет логика загрузки дополнительных ивентов
+        alert('Загрузка дополнительных ивентов...');
+    }
+    
+    // Анимация при скролле
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.event-card-extended').forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = `all 0.6s ease ${index * 0.1}s`;
+        observer.observe(el);
+    });
+</script>
+{% endblock %}

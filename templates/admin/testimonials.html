@@ -1,0 +1,182 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Управление отзывами - Consilium Admin{% endblock %}
+
+{% block breadcrumb %}
+<span style="color: var(--gray-secondary);"> / </span>
+<span>Отзывы</span>
+{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+    .testimonial-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .quote-icon {
+        font-size: 3rem;
+        color: var(--green-primary);
+        opacity: 0.3;
+        position: absolute;
+        top: 20px;
+        right: 30px;
+    }
+    
+    .testimonial-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 25px;
+        color: var(--text-light);
+        font-style: italic;
+    }
+    
+    .testimonial-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .author-info {
+        flex: 1;
+    }
+    
+    .author-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .author-event {
+        color: var(--gray-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .rating {
+        display: flex;
+        gap: 3px;
+        color: var(--yellow-primary);
+        margin-bottom: 10px;
+    }
+    
+    .card-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-light);
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+    
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .action-btn.delete {
+        color: var(--red-primary);
+        border-color: rgba(255, 126, 147, 0.3);
+    }
+    
+    .action-btn.delete:hover {
+        background: rgba(255, 126, 147, 0.1);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--gray-secondary);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Управление отзывами</h1>
+    <a href="{{ url_for('admin_testimonial_new') }}" class="btn">
+        <span style="margin-right: 8px;">➕</span> Добавить отзыв
+    </a>
+</div>
+
+{% if testimonials %}
+<div class="testimonials-grid">
+    {% for testimonial in testimonials %}
+    <div class="testimonial-card">
+        <div class="quote-icon">"</div>
+        
+        <div class="rating">
+            {% for i in range(testimonial.rating) %}
+            <span>⭐</span>
+            {% endfor %}
+        </div>
+        
+        <p class="testimonial-text">{{ testimonial.text }}</p>
+        
+        <div class="testimonial-footer">
+            <div class="author-info">
+                <div class="author-name">{{ testimonial.author }}</div>
+                <div class="author-event">Ивент: "{{ testimonial.event }}"</div>
+            </div>
+            
+            <div class="card-actions">
+                <form action="{{ url_for('admin_testimonial_delete', testimonial_id=testimonial.get('id', 0)) }}" method="POST" style="display: inline;">
+                    <button type="submit" class="action-btn delete" title="Удалить" 
+                            onclick="return confirm('Вы уверены, что хотите удалить этот отзыв?')">
+                        🗑️
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">💬</div>
+    <h3>Отзывы не найдены</h3>
+    <p>Добавьте первый отзыв от участников сообщества</p>
+    <a href="{{ url_for('admin_testimonial_new') }}" class="btn" style="margin-top: 20px;">Добавить отзыв</a>
+</div>
+{% endif %}
+
+{% endblock %}

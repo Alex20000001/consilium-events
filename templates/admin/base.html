@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Админ-панель - Consilium{% endblock %}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --green-primary: #8CBF70;
+            --green-secondary: #9DDECA;
+            --yellow-primary: #FFEA4A;
+            --yellow-secondary: #FFD381;
+            --red-primary: #FF7E93;
+            --red-secondary: #FFAFD2;
+            --blue-primary: #6CBBDF;
+            --blue-secondary: #9BC3FF;
+            --gray-primary: #DBDBDB;
+            --gray-secondary: #BEBEBE;
+            --dark-bg: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--dark-secondary);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-light);
+        }
+        
+        .logo-symbol {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at center, transparent 35%, var(--green-primary) 40%, var(--green-primary) 60%, transparent 65%);
+            border-radius: 50%;
+            filter: blur(1px);
+            position: relative;
+        }
+        
+        .logo-symbol::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: var(--dark-secondary);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .admin-badge {
+            font-size: 0.7rem;
+            background: var(--green-primary);
+            color: var(--dark-bg);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 30px;
+        }
+        
+        .nav-section-title {
+            padding: 10px 30px;
+            font-size: 0.85rem;
+            color: var(--gray-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 15px 30px;
+            color: var(--gray-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+        
+        .nav-item.active {
+            background: rgba(140, 191, 112, 0.1);
+            color: var(--green-primary);
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--green-primary);
+        }
+        
+        .nav-icon {
+            font-size: 1.2rem;
+            width: 25px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+        
+        .top-bar {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .breadcrumb {
+            color: var(--gray-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .breadcrumb a {
+            color: var(--gray-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--green-primary);
+        }
+        
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-menu:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--dark-bg);
+        }
+        
+        .logout-btn {
+            color: var(--red-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            color: var(--red-secondary);
+        }
+        
+        .content-wrapper {
+            padding: 40px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+            color: var(--dark-bg);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(140, 191, 112, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--green-primary);
+            color: var(--green-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--green-primary);
+            color: var(--dark-bg);
+        }
+        
+        .btn-danger {
+            background: var(--red-primary);
+            color: var(--text-light);
+        }
+        
+        .btn-danger:hover {
+            background: var(--red-secondary);
+            box-shadow: 0 10px 25px rgba(255, 126, 147, 0.4);
+        }
+        
+        .btn-sm {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .alert-success {
+            background: rgba(140, 191, 112, 0.1);
+            border: 1px solid rgba(140, 191, 112, 0.3);
+            color: var(--green-primary);
+        }
+        
+        .alert-error {
+            background: rgba(255, 126, 147, 0.1);
+            border: 1px solid rgba(255, 126, 147, 0.3);
+            color: var(--red-primary);
+        }
+        
+        .alert-info {
+            background: rgba(108, 187, 223, 0.1);
+            border: 1px solid rgba(108, 187, 223, 0.3);
+            color: var(--blue-primary);
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--gray-primary);
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--green-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-logo">
+                    <div class="logo-symbol"></div>
+                    <div>
+                        <span class="logo-text">Консилиум</span>
+                        <span class="admin-badge">Admin</span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Основное</div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <span class="nav-icon">📊</span>
+                        <span>Дашборд</span>
+                    </a>
+                    <a href="{{ url_for('admin_events') }}" class="nav-item {% if 'event' in request.endpoint %}active{% endif %}">
+                        <span class="nav-icon">📅</span>
+                        <span>Ивенты</span>
+                    </a>
+                    <a href="{{ url_for('admin_stats') }}" class="nav-item {% if request.endpoint == 'admin_stats' %}active{% endif %}">
+                        <span class="nav-icon">📈</span>
+                        <span>Статистика</span>
+                    </a>
+                    <a href="{{ url_for('admin_testimonials') }}" class="nav-item {% if 'testimonial' in request.endpoint %}active{% endif %}">
+                        <span class="nav-icon">💬</span>
+                        <span>Отзывы</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Быстрые действия</div>
+                    <a href="{{ url_for('admin_event_new') }}" class="nav-item">
+                        <span class="nav-icon">➕</span>
+                        <span>Создать ивент</span>
+                    </a>
+                    <a href="{{ url_for('admin_testimonial_new') }}" class="nav-item">
+                        <span class="nav-icon">✍️</span>
+                        <span>Добавить отзыв</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Сайт</div>
+                    <a href="{{ url_for('index') }}" class="nav-item" target="_blank">
+                        <span class="nav-icon">🌐</span>
+                        <span>Перейти на сайт</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <div class="breadcrumb">
+                        <a href="{{ url_for('admin_dashboard') }}">Админ-панель</a>
+                        {% block breadcrumb %}{% endblock %}
+                    </div>
+                </div>
+                
+                <div class="top-bar-right">
+                    <div class="user-menu">
+                        <div class="user-avatar">А</div>
+                        <span>Администратор</span>
+                    </div>
+                    <a href="{{ url_for('admin_logout') }}" class="logout-btn">Выйти</a>
+                </div>
+            </div>
+            
+            <div class="content-wrapper">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {% if category == 'success' %}
+                                    <span>✅</span>
+                                {% elif category == 'error' %}
+                                    <span>❌</span>
+                                {% else %}
+                                    <span>ℹ️</span>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

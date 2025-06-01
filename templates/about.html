@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block title %}О проекте - Consilium{% endblock %}
+
+{% block content %}
+<style>
+    .about-hero {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at center, rgba(140, 191, 112, 0.2) 0%, transparent 70%);
+        z-index: -1;
+    }
+    
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: var(--gray-primary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+    
+    .mission-section {
+        padding: 100px 0;
+        background: var(--dark-secondary);
+    }
+    
+    .mission-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+        margin-top: 60px;
+    }
+    
+    .mission-content h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: var(--green-primary);
+    }
+    
+    .mission-content p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--gray-primary);
+        margin-bottom: 20px;
+    }
+    
+    .mission-visual {
+        position: relative;
+        height: 400px;
+    }
+    
+    .visual-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--green-primary) 0%, transparent 70%);
+        filter: blur(40px);
+        opacity: 0.5;
+    }
+    
+    .visual-circle:nth-child(1) {
+        width: 300px;
+        height: 300px;
+        top: 0;
+        left: 0;
+        animation: float 15s infinite ease-in-out;
+    }
+    
+    .visual-circle:nth-child(2) {
+        width: 200px;
+        height: 200px;
+        bottom: 0;
+        right: 0;
+        background: radial-gradient(circle, var(--blue-primary) 0%, transparent 70%);
+        animation: float 20s infinite ease-in-out reverse;
+    }
+    
+    .visual-circle:nth-child(3) {
+        width: 150px;
+        height: 150px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, var(--yellow-primary) 0%, transparent 70%);
+        animation: float 10s infinite ease-in-out;
+    }
+    
+    .values-section {
+        padding: 100px 0;
+    }
+    
+    .values-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+    
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 40px;
+    }
+    
+    .value-card {
+        text-align: center;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .value-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--green-primary), var(--blue-primary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .value-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .value-card:hover {
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+    }
+    
+    .value-card:nth-child(2) .value-icon {
+        background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
+    }
+    
+    .value-card:nth-child(3) .value-icon {
+        background: linear-gradient(135deg, var(--yellow-primary), var(--yellow-secondary));
+    }
+    
+    .value-card:nth-child(4) .value-icon {
+        background: linear-gradient(135deg, var(--red-primary), var(--red-secondary));
+    }
+    
+    .value-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .value-description {
+        color: var(--gray-primary);
+        line-height: 1.8;
+    }
+    
+    .journey-section {
+        padding: 100px 0;
+        background: var(--dark-secondary);
+    }
+    
+    .journey-timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 60px auto 0;
+    }
+    
+    .timeline-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, var(--green-primary), var(--blue-primary));
+        transform: translateX(-50%);
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding: 40px;
+        margin-bottom: 60px;
+    }
+    
+    .timeline-item:nth-child(odd) {
+        text-align: right;
+        padding-right: calc(50% + 40px);
+    }
+    
+    .timeline-item:nth-child(even) {
+        text-align: left;
+        padding-left: calc(50% + 40px);
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: var(--green-primary);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 4px solid var(--dark-secondary);
+    }
+    
+    .timeline-content {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .timeline-date {
+        font-weight: 700;
+        color: var(--green-primary);
+        margin-bottom: 10px;
+    }
+    
+    .timeline-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .timeline-description {
+        color: var(--gray-primary);
+        line-height: 1.6;
+    }
+    
+    .team-section {
+        padding: 100px 0;
+        text-align: center;
+    }
+    
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 40px;
+        margin-top: 60px;
+    }
+    
+    .team-member {
+        text-align: center;
+    }
+    
+    .member-avatar {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, var(--green-primary), var(--blue-primary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        font-weight: 700;
+        color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .member-avatar::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .team-member:hover .member-avatar::before {
+        transform: translateY(0);
+    }
+    
+    .member-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .member-role {
+        color: var(--green-primary);
+        margin-bottom: 15px;
+    }
+    
+    .member-bio {
+        color: var(--gray-primary);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .mission-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+        
+        .timeline-item:nth-child(odd),
+        .timeline-item:nth-child(even) {
+            text-align: left;
+            padding-left: 60px;
+            padding-right: 20px;
+        }
+        
+        .timeline-line {
+            left: 20px;
+        }
+        
+        .timeline-dot {
+            left: 20px;
+        }
+    }
+</style>
+
+<div class="about-hero">
+    <div class="container">
+        <h1 class="hero-title brand-heading">О Consilium</h1>
+        <p class="hero-subtitle">Создаем пространство для глубоких обсуждений и личностного роста</p>
+    </div>
+</div>
+
+<section class="mission-section">
+    <div class="container">
+        <div class="mission-grid">
+            <div class="mission-content">
+                <h2>Наша миссия</h2>
+                <p>Consilium — это больше, чем просто приложение. Это сообщество людей, которые ищут ответы на важные вопросы, делятся своим опытом и поддерживают друг друга на пути личностного роста.</p>
+                <p>Мы верим, что каждый человек имеет право быть услышанным, и что в коллективной мудрости можно найти ответы на самые сложные вопросы жизни.</p>
+                <p>Наши ивенты — это безопасное пространство, где можно открыто говорить о том, что действительно важно, без осуждения и с полным принятием.</p>
+            </div>
+            <div class="mission-visual">
+                <div class="visual-circle"></div>
+                <div class="visual-circle"></div>
+                <div class="visual-circle"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="values-section">
+    <div class="container">
+        <div class="values-header">
+            <h2 class="section-title brand-heading">Наши ценности</h2>
+            <p class="section-subtitle">Принципы, которые объединяют наше сообщество</p>
+        </div>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <h3 class="value-title">Принятие</h3>
+                <p class="value-description">Мы принимаем каждого таким, какой он есть, со всеми переживаниями и опытом</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">💬</div>
+                <h3 class="value-title">Открытость</h3>
+                <p class="value-description">Создаем пространство для честных и глубоких разговоров о важном</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">🌱</div>
+                <h3 class="value-title">Рост</h3>
+                <p class="value-description">Поддерживаем стремление к личностному развитию и трансформации</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">❤️</div>
+                <h3 class="value-title">Поддержка</h3>
+                <p class="value-description">Объединяем людей, готовых поддержать друг друга на жизненном пути</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="journey-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <h2 class="section-title brand-heading">Наш путь</h2>
+            <p class="section-subtitle">История создания и развития Consilium</p>
+        </div>
+        
+        <div class="journey-timeline">
+            <div class="timeline-line"></div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Март 2024</div>
+                    <h3 class="timeline-title">Рождение идеи</h3>
+                    <p class="timeline-description">Концепция дневника с ИИ и цифрового бессмертия положила начало проекту</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Январь 2025</div>
+                    <h3 class="timeline-title">Запуск первой версии</h3>
+                    <p class="timeline-description">Consilium открыл свои двери для первых пользователей, предложив уникальный опыт взаимодействия с ИИ</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Июнь 2025</div>
+                    <h3 class="timeline-title">Старт живых встреч</h3>
+                    <p class="timeline-description">Начало проведения офлайн-ивентов для глубоких философских дискуссий</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Сегодня</div>
+                    <h3 class="timeline-title">Растущее сообщество</h3>
+                    <p class="timeline-description">Consilium продолжает развиваться, объединяя искателей истины и создавая цифровое наследие</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="team-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title brand-heading">Команда</h2>
+            <p class="section-subtitle">Люди, которые делают Consilium возможным</p>
+        </div>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-avatar">СО</div>
+                <h3 class="member-name">Самвел Оганесян</h3>
+                <p class="member-role">Основатель</p>
+                <p class="member-bio">Создатель концепции цифрового бессмертия. Разработал технологию, которая сохраняет ваш ИИ-клон в приложении, делая возможным вечное наследие.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">АМ</div>
+                <h3 class="member-name">Алексей Маслянчук</h3>
+                <p class="member-role">Сооснователь</p>
+                <p class="member-bio">Профессиональный философ, воплотивший мечту о создании пространства для поиска истины и глубоких размышлений.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">АП</div>
+                <h3 class="member-name">Александр Приходченко</h3>
+                <p class="member-role">Сооснователь</p>
+                <p class="member-bio">Человек-загадка. Предпочитает раскрывать свою историю только внутри приложения, где каждый может быть собой.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">☀️</div>
+                <h3 class="member-name">Сан</h3>
+                <p class="member-role">Душа проекта</p>
+                <p class="member-bio">Человек-солнце, который наполняет проект теплом и светом, создавая атмосферу принятия и поддержки.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-bg"></div>
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="brand-heading">Присоединяйтесь к нам</h2>
+            <p>Станьте частью сообщества, где каждый голос имеет значение</p>
+            <div style="margin-top: 40px;">
+                <a href="/events" class="btn" style="font-size: 1.1rem; padding: 15px 40px;">Посмотреть ивенты</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

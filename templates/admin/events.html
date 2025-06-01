@@ -1,0 +1,254 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Управление ивентами - Consilium Admin{% endblock %}
+
+{% block breadcrumb %}
+<span style="color: var(--gray-secondary);"> / </span>
+<span>Ивенты</span>
+{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .events-filters {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 10px 20px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--gray-primary);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover {
+        border-color: var(--green-primary);
+        color: var(--green-primary);
+    }
+    
+    .filter-btn.active {
+        background: var(--green-primary);
+        color: var(--dark-bg);
+        border-color: var(--green-primary);
+    }
+    
+    .events-table {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: none;
+        color: var(--text-light);
+    }
+    
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .action-btn.edit {
+        color: var(--blue-primary);
+        border-color: rgba(108, 187, 223, 0.3);
+    }
+    
+    .action-btn.edit:hover {
+        background: rgba(108, 187, 223, 0.1);
+    }
+    
+    .action-btn.complete {
+        color: var(--green-primary);
+        border-color: rgba(140, 191, 112, 0.3);
+    }
+    
+    .action-btn.complete:hover {
+        background: rgba(140, 191, 112, 0.1);
+    }
+    
+    .action-btn.delete {
+        color: var(--red-primary);
+        border-color: rgba(255, 126, 147, 0.3);
+    }
+    
+    .action-btn.delete:hover {
+        background: rgba(255, 126, 147, 0.1);
+    }
+    
+    .status-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-upcoming {
+        background: rgba(140, 191, 112, 0.2);
+        color: var(--green-primary);
+    }
+    
+    .status-past {
+        background: rgba(190, 190, 190, 0.2);
+        color: var(--gray-secondary);
+    }
+    
+    .category-badge {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        background: rgba(108, 187, 223, 0.2);
+        color: var(--blue-primary);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--gray-secondary);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 1200px) {
+        .data-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Управление ивентами</h1>
+    <a href="{{ url_for('admin_event_new') }}" class="btn">
+        <span style="margin-right: 8px;">➕</span> Создать ивент
+    </a>
+</div>
+
+<div class="events-filters">
+    <button class="filter-btn active" onclick="filterEvents('all')">Все ивенты</button>
+    <button class="filter-btn" onclick="filterEvents('upcoming')">Предстоящие</button>
+    <button class="filter-btn" onclick="filterEvents('past')">Завершенные</button>
+</div>
+
+{% if events %}
+<div class="events-table">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Тема поста</th>
+                <th>Автор</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Категория</th>
+                <th>Участники</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr data-status="{{ event.status }}">
+                <td>#{{ event.id }}</td>
+                <td style="max-width: 300px;">{{ event.post_text[:80] }}...</td>
+                <td>{{ event.author }}</td>
+                <td>{{ event.event_date.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <span class="status-badge {% if event.status == 'upcoming' %}status-upcoming{% else %}status-past{% endif %}">
+                        {% if event.status == 'upcoming' %}Предстоящий{% else %}Завершен{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span class="category-badge">{{ event.category }}</span>
+                </td>
+                <td>{{ event.participants }}</td>
+                <td>
+                    <div class="table-actions">
+                        <a href="{{ url_for('admin_event_edit', event_id=event.id) }}" class="action-btn edit" title="Редактировать">
+                            ✏️
+                        </a>
+                        {% if event.status == 'upcoming' %}
+                        <form action="{{ url_for('admin_event_complete', event_id=event.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="action-btn complete" title="Завершить" onclick="return confirm('Отметить ивент как завершенный?')">
+                                ✅
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form action="{{ url_for('admin_event_delete', event_id=event.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="action-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить этот ивент?')">
+                                🗑️
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📅</div>
+    <h3>Ивенты не найдены</h3>
+    <p>Создайте первый ивент для вашего сообщества</p>
+    <a href="{{ url_for('admin_event_new') }}" class="btn" style="margin-top: 20px;">Создать ивент</a>
+</div>
+{% endif %}
+
+<script>
+function filterEvents(status) {
+    const buttons = document.querySelectorAll('.filter-btn');
+    const rows = document.querySelectorAll('tbody tr');
+    
+    // Обновляем активную кнопку
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Фильтруем строки
+    rows.forEach(row => {
+        if (status === 'all') {
+            row.style.display = '';
+        } else {
+            if (row.dataset.status === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Управление статистикой - Consilium Admin{% endblock %}
+
+{% block breadcrumb %}
+<span style="color: var(--gray-secondary);"> / </span>
+<span>Статистика</span>
+{% endblock %}
+
+{% block content %}
+<style>
+    .stats-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+    }
+    
+    .stats-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .preview-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .preview-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .preview-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--green-primary);
+        margin-bottom: 5px;
+    }
+    
+    .preview-label {
+        color: var(--gray-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .form-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--green-primary);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .help-text {
+        background: rgba(108, 187, 223, 0.1);
+        border: 1px solid rgba(108, 187, 223, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        color: var(--blue-primary);
+    }
+    
+    .help-text p {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="stats-container">
+    <h1 class="page-title">Управление статистикой сообщества</h1>
+    
+    <!-- Текущие показатели -->
+    <div class="stats-preview">
+        <div class="preview-card">
+            <div class="preview-icon">👥</div>
+            <div class="preview-value">{{ stats.total_users }}</div>
+            <div class="preview-label">Участников</div>
+        </div>
+        <div class="preview-card">
+            <div class="preview-icon">📝</div>
+            <div class="preview-value">{{ stats.active_posts }}</div>
+            <div class="preview-label">Активных постов</div>
+        </div>
+        <div class="preview-card">
+            <div class="preview-icon">🎯</div>
+            <div class="preview-value">{{ stats.events_held }}</div>
+            <div class="preview-label">Проведено ивентов</div>
+        </div>
+        <div class="preview-card">
+            <div class="preview-icon">📍</div>
+            <div class="preview-value">{{ stats.cities }}</div>
+            <div class="preview-label">Городов</div>
+        </div>
+    </div>
+    
+    <div class="form-card">
+        <div class="help-text">
+            <p>
+                <span>ℹ️</span>
+                <span>Обновите статистику сообщества, которая отображается на главной странице и в разделе "О проекте"</span>
+            </p>
+        </div>
+        
+        <form method="POST">
+            <div class="form-section">
+                <h2 class="section-title">Основные показатели</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="total_users">Количество участников</label>
+                        <input type="number" id="total_users" name="total_users" 
+                               value="{{ stats.total_users }}" required min="0">
+                        <p class="form-hint">Общее количество пользователей в приложении</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="active_posts">Активных постов</label>
+                        <input type="number" id="active_posts" name="active_posts" 
+                               value="{{ stats.active_posts }}" required min="0">
+                        <p class="form-hint">Количество постов за последний месяц</p>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="events_held">Проведено ивентов</label>
+                        <input type="number" id="events_held" name="events_held" 
+                               value="{{ stats.events_held }}" required min="0">
+                        <p class="form-hint">Всего проведено встреч и обсуждений</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cities">Количество городов</label>
+                        <input type="number" id="cities" name="cities" 
+                               value="{{ stats.cities }}" required min="0">
+                        <p class="form-hint">В скольких городах проходят встречи</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn">Сохранить изменения</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

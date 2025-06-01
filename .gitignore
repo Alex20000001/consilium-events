@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# Flask
+instance/
+.webassets-cache
+
+# Конфиденциальные данные
+.env
+.env.local
+.env.production
+consilium_data.json
+*.db
+*.sqlite
+
+# Логи
+logs/
+*.log
+
+# Резервные копии
+backups/
+*.backup
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Временные файлы
+*.tmp
+*.temp
+Thumbs.db

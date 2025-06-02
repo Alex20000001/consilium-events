@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}{{ event.post_text[:50] }}... - Consilium Event{% endblock %}
@@ -180,15 +181,125 @@
         margin-top: 30px;
     }
     
+    .action-buttons .btn {
+        background: var(--green-primary);
+        color: var(--dark-bg);
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        font-family: inherit;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(140, 191, 112, 0.3);
+    }
+    
     .btn-secondary {
-        background: transparent;
-        border: 2px solid var(--green-primary);
-        color: var(--green-primary);
+        background: transparent !important;
+        border: 2px solid var(--green-primary) !important;
+        color: var(--green-primary) !important;
     }
     
     .btn-secondary:hover {
-        background: var(--green-primary);
-        color: var(--dark-bg);
+        background: var(--green-primary) !important;
+        color: var(--dark-bg) !important;
+    }
+    
+    /* Стили для модального окна */
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .modal-content {
+        background: var(--dark-bg);
+        padding: 40px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--gray-secondary);
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .close:hover {
+        color: var(--text-light);
+    }
+    
+    .modal-content h3 {
+        margin-bottom: 30px;
+        color: var(--green-primary);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: var(--text-light);
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--green-primary);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    .form-success {
+        background: rgba(140, 191, 112, 0.2);
+        border: 1px solid var(--green-primary);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        color: var(--green-primary);
     }
     
     @media (max-width: 768px) {
@@ -213,6 +324,10 @@
         .action-buttons .btn {
             width: 100%;
             max-width: 300px;
+        }
+        
+        .modal-content {
+            padding: 30px 20px;
         }
     }
 </style>
@@ -292,8 +407,42 @@
         <p style="color: var(--gray-primary); margin-bottom: 20px;">Выберите удобный для вас формат участия</p>
         
         <div class="action-buttons">
-            <a href="https://apps.apple.com/ru/app/consilium/id6502836550" class="btn">Записаться на офлайн</a>
+            <button type="button" onclick="showRegistrationForm()" class="btn" style="cursor: pointer;">Записаться на офлайн</button>
             <a href="https://apps.apple.com/ru/app/consilium/id6502836550" class="btn btn-secondary">Участвовать онлайн</a>
+        </div>
+    </div>
+    
+    <!-- Модальное окно с формой -->
+    <div id="registrationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegistrationForm()">&times;</span>
+            <h3>Регистрация на офлайн встречу</h3>
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="name">Ваше имя *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Телефон *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+7 (999) 123-45-67" required>
+                </div>
+                <div class="form-group">
+                    <label for="about">Расскажите немного о себе</label>
+                    <textarea id="about" name="about" rows="3" placeholder="Чем занимаетесь, что вас привлекло в этом ивенте..."></textarea>
+                </div>
+                <input type="hidden" name="event_id" value="{{ event.id }}">
+                <button type="submit" class="btn">Отправить заявку</button>
+            </form>
+            <div id="formSuccess" style="display: none;">
+                <div class="form-success">
+                    <h4>Спасибо за регистрацию!</h4>
+                    <p>Мы отправили подтверждение на вашу почту. До встречи на ивенте!</p>
+                </div>
+            </div>
         </div>
     </div>
     {% else %}
@@ -308,4 +457,67 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+function showRegistrationForm() {
+    document.getElementById('registrationModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRegistrationForm() {
+    document.getElementById('registrationModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Закрытие модального окна при клике вне его
+window.onclick = function(event) {
+    const modal = document.getElementById('registrationModal');
+    if (event.target == modal) {
+        closeRegistrationForm();
+    }
+}
+
+// Обработка отправки формы
+document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Добавляем информацию об ивенте
+    data.event_title = "{{ event.post_text[:50] }}...";
+    data.event_date = "{{ event.event_date.strftime('%d.%m.%Y %H:%M') }}";
+    data.event_author = "{{ event.author }}";
+    
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            // Показываем сообщение об успехе
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('formSuccess').style.display = 'block';
+            
+            // Закрываем модальное окно через 3 секунды
+            setTimeout(() => {
+                closeRegistrationForm();
+                // Сбрасываем форму
+                document.getElementById('registrationForm').reset();
+                document.getElementById('registrationForm').style.display = 'block';
+                document.getElementById('formSuccess').style.display = 'none';
+            }, 3000);
+        } else {
+            alert('Произошла ошибка при отправке заявки. Пожалуйста, попробуйте еще раз.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке заявки. Пожалуйста, попробуйте еще раз.');
+    }
+});
+</script>
 {% endblock %}

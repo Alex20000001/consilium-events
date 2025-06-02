@@ -5,6 +5,14 @@ import json
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Загрузка переменных окружения
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -23,6 +31,13 @@ DATA_FILE = os.environ.get('DATA_FILE') or 'consilium_data.json'
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH') or generate_password_hash('consilium2024')
 
+# Email настройки
+SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.yandex.ru')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME', 'consilium-events@yandex.com')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', 'consilium-events@yandex.com')
+
 # Функция для загрузки данных из файла
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -38,6 +53,39 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+
+# Функция отправки email
+def send_email(subject, body):
+    """Функция отправки email через SMTP с поддержкой SSL"""
+    try:
+        # Создаем сообщение
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = subject
+        
+        # Добавляем текст письма
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        
+        # Определяем тип подключения по порту
+        if SMTP_PORT == 465:
+            # SSL подключение
+            import ssl
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                server.send_message(msg)
+        else:
+            # TLS подключение
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                server.starttls()
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                server.send_message(msg)
+        
+        print(f"Email успешно отправлен на {RECIPIENT_EMAIL}")
+    except Exception as e:
+        print(f"Ошибка при отправке email: {e}")
+        raise
 
 # Декоратор для проверки авторизации
 def login_required(f):
@@ -225,6 +273,50 @@ def event_detail(event_id):
                              event=event, 
                              similar_events=similar_events)
     return "Ивент не найден", 404
+
+# API для регистрации на ивент
+@app.route('/api/register', methods=['POST'])
+def register_for_event():
+    try:
+        data = request.json
+        
+        # Формируем текст письма
+        email_subject = f"Новая регистрация на ивент: {data.get('event_title', 'Неизвестный ивент')}"
+        
+        email_body = f"""
+Новая регистрация на офлайн встречу!
+
+Информация об участнике:
+- Имя: {data.get('name')}
+- Email: {data.get('email')}
+- Телефон: {data.get('phone')}
+- О себе: {data.get('about', 'Не указано')}
+
+Информация об ивенте:
+- Название: {data.get('event_title')}
+- Дата и время: {data.get('event_date')}
+- Автор поста: {data.get('event_author')}
+
+---
+Это письмо отправлено автоматически с сайта consilium-events.ru
+"""
+
+        # Отправка email
+        if SMTP_PASSWORD:  # Только если настроен пароль
+            send_email(email_subject, email_body)
+        else:
+            # Если email не настроен, сохраняем в файл
+            with open('registrations.log', 'a', encoding='utf-8') as f:
+                f.write(f"\n{'='*50}\n")
+                f.write(f"Дата: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(email_body)
+            print("Email не настроен. Регистрация сохранена в registrations.log")
+        
+        return jsonify({"success": True, "message": "Регистрация успешно отправлена"})
+    
+    except Exception as e:
+        print(f"Ошибка при регистрации: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # Административные маршруты
 @app.route('/admin/login', methods=['GET', 'POST'])

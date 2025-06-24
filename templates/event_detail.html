@@ -191,6 +191,140 @@
         color: var(--dark-bg);
     }
     
+    /* Стили для модального окна */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 10000;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: var(--dark-secondary);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: var(--gray-secondary);
+        font-size: 30px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+    }
+    
+    .modal-header {
+        margin-bottom: 30px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.8rem;
+        color: var(--green-primary);
+        margin-bottom: 10px;
+    }
+    
+    .modal-header p {
+        color: var(--gray-primary);
+        font-size: 0.95rem;
+    }
+    
+    .registration-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        color: var(--text-light);
+        font-size: 0.95rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--green-primary);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .form-submit {
+        margin-top: 20px;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+    
+    .success-message {
+        display: none;
+        background: rgba(140, 191, 112, 0.2);
+        border: 1px solid var(--green-primary);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: var(--green-primary);
+    }
+    
+    .success-message.active {
+        display: block;
+    }
+    
     @media (max-width: 768px) {
         .event-header {
             padding: 30px 20px;
@@ -213,6 +347,10 @@
         .action-buttons .btn {
             width: 100%;
             max-width: 300px;
+        }
+        
+        .modal-content {
+            padding: 30px 20px;
         }
     }
 </style>
@@ -292,8 +430,8 @@
         <p style="color: var(--gray-primary); margin-bottom: 20px;">Выберите удобный для вас формат участия</p>
         
         <div class="action-buttons">
-            <a href="#" class="btn">Записаться на офлайн</a>
-            <a href="#" class="btn btn-secondary">Участвовать онлайн</a>
+            <button onclick="showRegistrationForm()" class="btn">Записаться на офлайн</button>
+            <button onclick="showRegistrationForm('online')" class="btn btn-secondary">Участвовать онлайн</button>
         </div>
     </div>
     {% else %}
@@ -308,4 +446,156 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Модальное окно регистрации -->
+<div class="modal-overlay" id="registrationModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeRegistrationForm()">&times;</button>
+        
+        <div class="modal-header">
+            <h2>Запись на событие</h2>
+            <p id="modalDescription">Заполните форму для участия в офлайн встрече</p>
+        </div>
+        
+        <form class="registration-form" id="registrationForm" onsubmit="submitRegistration(event)">
+            <input type="hidden" id="eventId" value="{{ event.id }}">
+            <input type="hidden" id="eventType" value="offline">
+            
+            <div class="form-group">
+                <label for="userName">Ваше имя *</label>
+                <input type="text" id="userName" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="userEmail">Email *</label>
+                <input type="email" id="userEmail" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="userPhone">Телефон</label>
+                <input type="tel" id="userPhone" name="phone" placeholder="+7 (999) 999-99-99">
+            </div>
+            
+            <div class="form-group" id="cityGroup">
+                <label for="userCity">Город *</label>
+                <input type="text" id="userCity" name="city" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="userMessage">Сообщение или вопрос (необязательно)</label>
+                <textarea id="userMessage" name="message" placeholder="Расскажите, что вас привлекло в этом событии"></textarea>
+            </div>
+            
+            <button type="submit" class="btn form-submit">Записаться</button>
+        </form>
+        
+        <div class="success-message" id="successMessage">
+            <h3>Спасибо за регистрацию!</h3>
+            <p>Мы отправили подтверждение на ваш email. До встречи на событии!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функция открытия формы регистрации
+function showRegistrationForm(type = 'offline') {
+    const modal = document.getElementById('registrationModal');
+    const modalDescription = document.getElementById('modalDescription');
+    const eventType = document.getElementById('eventType');
+    const cityGroup = document.getElementById('cityGroup');
+    
+    // Настраиваем форму в зависимости от типа
+    if (type === 'online') {
+        modalDescription.textContent = 'Заполните форму для участия в онлайн встрече';
+        eventType.value = 'online';
+        cityGroup.style.display = 'none';
+        document.getElementById('userCity').removeAttribute('required');
+    } else {
+        modalDescription.textContent = 'Заполните форму для участия в офлайн встрече';
+        eventType.value = 'offline';
+        cityGroup.style.display = 'block';
+        document.getElementById('userCity').setAttribute('required', 'required');
+    }
+    
+    // Показываем модальное окно
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Функция закрытия формы
+function closeRegistrationForm() {
+    const modal = document.getElementById('registrationModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    
+    // Сбрасываем форму
+    document.getElementById('registrationForm').reset();
+    document.getElementById('successMessage').classList.remove('active');
+    document.getElementById('registrationForm').style.display = 'flex';
+}
+
+// Отправка формы
+function submitRegistration(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('registrationForm');
+    const formData = new FormData(form);
+    const eventId = document.getElementById('eventId').value;
+    const eventType = document.getElementById('eventType').value;
+    
+    // Собираем данные
+    const data = {
+        event_id: eventId,
+        event_type: eventType,
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        city: formData.get('city'),
+        message: formData.get('message')
+    };
+    
+    // Отправляем на сервер
+    fetch(`/api/event/${eventId}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Показываем сообщение об успехе
+            form.style.display = 'none';
+            document.getElementById('successMessage').classList.add('active');
+            
+            // Закрываем модальное окно через 3 секунды
+            setTimeout(() => {
+                closeRegistrationForm();
+            }, 3000);
+        } else {
+            alert('Произошла ошибка при регистрации. Попробуйте еще раз.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка. Попробуйте еще раз позже.');
+    });
+}
+
+// Закрытие по клику вне модального окна
+document.getElementById('registrationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeRegistrationForm();
+    }
+});
+
+// Закрытие по Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRegistrationForm();
+    }
+});
+</script>
+
 {% endblock %}

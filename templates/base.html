@@ -9,6 +9,8 @@
         
         :root {
             --green-primary: #8CBF70;
+            --green-light: #7ed321;
+            --green-glow: #8fe331;
             --green-secondary: #9DDECA;
             --yellow-primary: #FFEA4A;
             --yellow-secondary: #FFD381;
@@ -52,7 +54,31 @@
             text-transform: uppercase;
         }
         
-        /* Навигация */
+        /* SVG иконки в стиле скриншота */
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--green-light);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(126, 211, 33, 0.3));
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover .nav-icon svg {
+            stroke: var(--green-glow);
+            filter: drop-shadow(0 0 15px rgba(126, 211, 33, 0.5));
+            transform: scale(1.1);
+        }
+        
+        /* Навигация с анимированным фоном */
         header {
             background-color: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
@@ -62,12 +88,123 @@
             z-index: 1000;
             padding: 20px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Световая анимация для header */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 20%, rgba(126, 211, 33, 0.1) 40%, transparent 70%);
+            animation: headerLight 8s ease-in-out infinite;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 20%, rgba(108, 187, 223, 0.1) 40%, transparent 70%);
+            animation: headerLight 8s ease-in-out infinite reverse;
+        }
+        
+        @keyframes headerLight {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+                opacity: 0.5;
+            }
+            25% {
+                transform: rotate(90deg) scale(1.2);
+                opacity: 0.8;
+            }
+            50% {
+                transform: rotate(180deg) scale(0.8);
+                opacity: 0.3;
+            }
+            75% {
+                transform: rotate(270deg) scale(1.1);
+                opacity: 0.6;
+            }
+        }
+        
+        /* Дополнительные световые лучи */
+        .header-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .light-beam {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(126, 211, 33, 0.4), transparent);
+            animation: beamMove 15s linear infinite;
+        }
+        
+        .light-beam:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .light-beam:nth-child(2) {
+            left: 30%;
+            animation-delay: 3s;
+            background: linear-gradient(to bottom, transparent, rgba(108, 187, 223, 0.4), transparent);
+        }
+        
+        .light-beam:nth-child(3) {
+            left: 50%;
+            animation-delay: 6s;
+            background: linear-gradient(to bottom, transparent, rgba(255, 234, 74, 0.4), transparent);
+        }
+        
+        .light-beam:nth-child(4) {
+            left: 70%;
+            animation-delay: 9s;
+            background: linear-gradient(to bottom, transparent, rgba(255, 126, 147, 0.4), transparent);
+        }
+        
+        .light-beam:nth-child(5) {
+            left: 90%;
+            animation-delay: 12s;
+        }
+        
+        @keyframes beamMove {
+            0% {
+                transform: translateY(-100%) scaleY(0);
+                opacity: 0;
+            }
+            10% {
+                transform: translateY(-50%) scaleY(1);
+                opacity: 1;
+            }
+            90% {
+                transform: translateY(50%) scaleY(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100%) scaleY(0);
+                opacity: 0;
+            }
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            z-index: 1;
         }
         
         .logo {
@@ -79,30 +216,16 @@
             transition: all 0.3s ease;
         }
         
-        .logo:hover .logo-symbol {
-            transform: rotate(180deg);
+        .logo:hover .logo-image {
+            transform: scale(1.1) rotate(5deg);
+            filter: brightness(1.2) drop-shadow(0 0 20px rgba(126, 211, 33, 0.6));
         }
         
-        .logo-symbol {
-            width: 45px;
-            height: 45px;
-            background: radial-gradient(circle at center, transparent 35%, var(--green-primary) 40%, var(--green-primary) 60%, transparent 65%);
-            border-radius: 50%;
-            position: relative;
-            filter: blur(1px);
-            transition: transform 0.6s ease;
-        }
-        
-        .logo-symbol::before {
-            content: '';
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background: var(--dark-bg);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(126, 211, 33, 0.4));
         }
         
         .logo-text {
@@ -133,12 +256,6 @@
         nav a:hover {
             color: var(--green-primary);
             transform: translateY(-2px);
-        }
-        
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
         }
         
         /* Кнопки с градиентами */
@@ -223,20 +340,38 @@
             width: 50px;
             height: 50px;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--green-primary);
             font-size: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .icon-box svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--green-light);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(126, 211, 33, 0.3));
             transition: all 0.3s ease;
         }
         
         .icon-box:hover {
-            background: var(--green-primary);
-            color: var(--dark-bg);
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .icon-box:hover svg {
+            stroke: var(--green-glow);
+            filter: drop-shadow(0 0 15px rgba(126, 211, 33, 0.5));
         }
         
         /* Градиентные фоны */
@@ -385,7 +520,83 @@
             color: var(--gray-secondary);
         }
         
-        /* Мобильное меню */
+        /* Мобильное меню - новый подход */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 99999;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu-overlay.active {
+            display: block !important;
+        }
+        
+        .mobile-menu-content {
+            padding: 80px 20px 40px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .mobile-menu-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 36px;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--green-primary);
+        }
+        
+        .mobile-menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .mobile-menu-list li {
+            margin-bottom: 10px;
+        }
+        
+        .mobile-menu-list a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .mobile-menu-list a:hover {
+            background: rgba(140, 191, 112, 0.2);
+            border-color: var(--green-primary);
+            transform: translateX(10px);
+        }
+        
         .mobile-menu-toggle {
             display: none;
             background: none;
@@ -393,34 +604,43 @@
             color: var(--text-light);
             font-size: 28px;
             cursor: pointer;
+            padding: 8px;
+            transition: all 0.3s ease;
+            z-index: 1002;
+            position: relative;
+        }
+        
+        .mobile-menu-toggle:hover {
+            color: var(--green-primary);
+        }
+        
+        .mobile-menu-toggle:focus {
+            outline: 2px solid var(--green-primary);
+            outline-offset: 2px;
         }
         
         /* Адаптивность */
         @media (max-width: 768px) {
+            /* Скрываем обычное меню */
             nav ul {
-                flex-direction: column;
-                gap: 20px;
-                position: absolute;
-                top: 70px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.98);
-                padding: 30px;
-                border-radius: 15px;
-                display: none;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            nav ul.active {
-                display: flex;
+                display: none !important;
             }
             
             .mobile-menu-toggle {
-                display: block;
+                display: block !important;
             }
             
             .footer-content {
                 grid-template-columns: 1fr;
                 text-align: center;
+            }
+            
+            .logo-text {
+                font-size: 20px;
+            }
+            
+            header {
+                padding: 15px 0;
             }
         }
     </style>
@@ -434,36 +654,107 @@
     </div>
     
     <header>
+        <div class="header-lights">
+            <div class="light-beam"></div>
+            <div class="light-beam"></div>
+            <div class="light-beam"></div>
+            <div class="light-beam"></div>
+            <div class="light-beam"></div>
+        </div>
         <div class="container">
             <div class="header-content">
                 <a href="/" class="logo">
-                    <div class="logo-symbol"></div>
+                    <svg width="50" height="50" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-image">
+                        <path d="M95.6234 95.3791L78.5948 78.4019C91.0453 65.989 91.0453 45.8069 78.5948 33.394L95.6234 16.4166C117.459 38.1864 117.459 73.6094 95.6234 95.3891V95.3791Z" fill="url(#paint0_radial_3378_405)"/>
+                        <path d="M56.0125 111.731C25.13 111.731 0 86.677 0 55.8878C0 25.0986 25.12 0.0544434 56.0125 0.0544434V24.0667C38.4066 24.0667 24.0949 38.345 24.0949 55.8878C24.0949 73.4306 38.4165 87.709 56.0125 87.709V111.721V111.731Z" fill="url(#paint1_radial_3378_405)"/>
+                        <defs>
+                            <radialGradient id="paint0_radial_3378_405" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(55.3956 55.114) scale(65.5668 65.3688)">
+                                <stop stop-color="#8BE8DF"/>
+                                <stop offset="0.07" stop-color="#8AE6DA"/>
+                                <stop offset="0.16" stop-color="#88E2CD"/>
+                                <stop offset="0.24" stop-color="#86DAB7"/>
+                                <stop offset="0.33" stop-color="#82D098"/>
+                                <stop offset="0.42" stop-color="#7EC371"/>
+                                <stop offset="0.44" stop-color="#7DC066"/>
+                                <stop offset="0.52" stop-color="#60934F"/>
+                                <stop offset="0.64" stop-color="#3A5730"/>
+                                <stop offset="0.74" stop-color="#1E2B19"/>
+                                <stop offset="0.81" stop-color="#0D100C"/>
+                                <stop offset="0.86" stop-color="#070707"/>
+                            </radialGradient>
+                            <radialGradient id="paint1_radial_3378_405" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(55.3954 55.1138) scale(65.5668 65.3688)">
+                                <stop stop-color="#8BE8DF"/>
+                                <stop offset="0.07" stop-color="#8AE6DA"/>
+                                <stop offset="0.16" stop-color="#88E2CD"/>
+                                <stop offset="0.24" stop-color="#86DAB7"/>
+                                <stop offset="0.33" stop-color="#82D098"/>
+                                <stop offset="0.42" stop-color="#7EC371"/>
+                                <stop offset="0.44" stop-color="#7DC066"/>
+                                <stop offset="0.52" stop-color="#60934F"/>
+                                <stop offset="0.64" stop-color="#3A5730"/>
+                                <stop offset="0.73" stop-color="#1E2B19"/>
+                                <stop offset="0.81" stop-color="#0D100C"/>
+                                <stop offset="0.86" stop-color="#070707"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
                     <span class="logo-text">Консилиум</span>
                 </a>
                 <nav>
-                    <button class="mobile-menu-toggle" onclick="toggleMenu()">☰</button>
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu(); return false;" aria-label="Открыть меню">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
                     <ul id="nav-menu">
                         <li>
                             <a href="/">
-                                <span class="nav-icon">🏠</span>
+                                <span class="nav-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                        <polyline points="9 22 9 12 15 12 15 22"/>
+                                    </svg>
+                                </span>
                                 <span>Главная</span>
                             </a>
                         </li>
                         <li>
                             <a href="/events">
-                                <span class="nav-icon">📅</span>
+                                <span class="nav-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                </span>
                                 <span>Ивенты</span>
                             </a>
                         </li>
                         <li>
                             <a href="/community">
-                                <span class="nav-icon">👥</span>
+                                <span class="nav-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                </span>
                                 <span>Сообщество</span>
                             </a>
                         </li>
                         <li>
                             <a href="/about">
-                                <span class="nav-icon">💡</span>
+                                <span class="nav-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                </span>
                                 <span>О проекте</span>
                             </a>
                         </li>
@@ -472,6 +763,64 @@
             </div>
         </div>
     </header>
+    
+    <!-- Мобильное меню overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu">
+        <button class="mobile-menu-close" onclick="closeMobileMenu()">&times;</button>
+        <div class="mobile-menu-content">
+            <ul class="mobile-menu-list">
+                <li>
+                    <a href="/">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                        </span>
+                        <span>Главная</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/events">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </span>
+                        <span>Ивенты</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/community">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </span>
+                        <span>Сообщество</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/about">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                        </span>
+                        <span>О проекте</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
     
     <main>
         {% block content %}{% endblock %}
@@ -485,13 +834,21 @@
                     <p style="color: var(--gray-primary); margin-bottom: 20px;">Для тех, кто ищет ответы</p>
                     <div style="display: flex; gap: 15px;">
                         <div class="icon-box" style="width: 40px; height: 40px;">
-                            <span>📱</span>
+                            <svg viewBox="0 0 24 24">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                <line x1="12" y1="18" x2="12.01" y2="18"/>
+                            </svg>
                         </div>
                         <div class="icon-box" style="width: 40px; height: 40px;">
-                            <span>💬</span>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
                         </div>
                         <div class="icon-box" style="width: 40px; height: 40px;">
-                            <span>🎧</span>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -502,7 +859,7 @@
                         <li><a href="/events">Все ивенты</a></li>
                         <li><a href="/community">Сообщество</a></li>
                         <li><a href="/about">О проекте</a></li>
-                        <li><a href="#app">Скачать приложение</a></li>
+                        <li><a href="/#app" onclick="smoothScrollToApp(event)">Скачать приложение</a></li>
                     </ul>
                 </div>
                 
@@ -519,7 +876,7 @@
                 <div class="footer-section">
                     <h4>Присоединяйтесь</h4>
                     <p style="color: var(--gray-primary); margin-bottom: 20px;">Станьте частью сообщества искателей</p>
-                    <a href="#" class="btn" style="display: inline-block;">Скачать приложение</a>
+                    <a href="/#app" class="btn" style="display: inline-block;" onclick="smoothScrollToApp(event)">Скачать приложение</a>
                 </div>
             </div>
             
@@ -530,20 +887,97 @@
     </footer>
     
     <script>
-        function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('active');
+        // Функции для мобильного меню
+        function openMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Блокируем скролл
+                console.log('Mobile menu opened');
+            }
         }
         
-        // Анимация при скролле
-        window.addEventListener('scroll', () => {
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.remove('active');
+                document.body.style.overflow = ''; // Возвращаем скролл
+                console.log('Mobile menu closed');
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                if (menu.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
+        }
+        
+        // Делаем функции глобальными
+        window.openMobileMenu = openMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.toggleMenu = toggleMobileMenu; // Для обратной совместимости
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing mobile menu overlay...');
+            
+            // Закрытие меню при клике на ссылку
+            const menuLinks = document.querySelectorAll('.mobile-menu-list a');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    closeMobileMenu();
+                });
+            });
+            
+            // Закрытие меню при клике на overlay (но не на контент)
+            const overlay = document.getElementById('mobile-menu');
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+            
+            // Закрытие меню по Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                }
+            });
+        });
+        
+        // Анимация header при скролле
+        window.addEventListener('scroll', function() {
             const header = document.querySelector('header');
-            if (window.scrollY > 100) {
-                header.style.background = 'rgba(0, 0, 0, 0.95)';
-            } else {
-                header.style.background = 'rgba(0, 0, 0, 0.9)';
+            if (header) {
+                if (window.scrollY > 100) {
+                    header.style.background = 'rgba(0, 0, 0, 0.95)';
+                } else {
+                    header.style.background = 'rgba(0, 0, 0, 0.9)';
+                }
             }
         });
+        
+        // Функция плавной прокрутки
+        window.smoothScrollToApp = function(event) {
+            if (event) event.preventDefault();
+            
+            if (window.location.pathname === '/') {
+                const target = document.querySelector('#app');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                window.location.href = '/#app';
+            }
+        }
     </script>
 </body>
 </html>

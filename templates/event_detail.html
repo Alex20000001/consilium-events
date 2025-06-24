@@ -430,8 +430,8 @@
         <p style="color: var(--gray-primary); margin-bottom: 20px;">Выберите удобный для вас формат участия</p>
         
         <div class="action-buttons">
-            <button onclick="showRegistrationForm()" class="btn">Записаться на офлайн</button>
-            <button onclick="showRegistrationForm('online')" class="btn btn-secondary">Участвовать онлайн</button>
+            <button id="offlineBtn" class="btn">Записаться на офлайн</button>
+            <button id="onlineBtn" class="btn btn-secondary">Участвовать онлайн</button>
         </div>
     </div>
     {% else %}
@@ -450,14 +450,14 @@
 <!-- Модальное окно регистрации -->
 <div class="modal-overlay" id="registrationModal">
     <div class="modal-content">
-        <button class="modal-close" onclick="closeRegistrationForm()">&times;</button>
+        <button class="modal-close" id="modalClose">&times;</button>
         
         <div class="modal-header">
             <h2>Запись на событие</h2>
             <p id="modalDescription">Заполните форму для участия в офлайн встрече</p>
         </div>
         
-        <form class="registration-form" id="registrationForm" onsubmit="submitRegistration(event)">
+        <form class="registration-form" id="registrationForm">
             <input type="hidden" id="eventId" value="{{ event.id }}">
             <input type="hidden" id="eventType" value="offline">
             
@@ -497,104 +497,126 @@
 </div>
 
 <script>
-// Функция открытия формы регистрации
-function showRegistrationForm(type = 'offline') {
+document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('registrationModal');
     const modalDescription = document.getElementById('modalDescription');
     const eventType = document.getElementById('eventType');
     const cityGroup = document.getElementById('cityGroup');
-    
-    // Настраиваем форму в зависимости от типа
-    if (type === 'online') {
-        modalDescription.textContent = 'Заполните форму для участия в онлайн встрече';
-        eventType.value = 'online';
-        cityGroup.style.display = 'none';
-        document.getElementById('userCity').removeAttribute('required');
-    } else {
-        modalDescription.textContent = 'Заполните форму для участия в офлайн встрече';
-        eventType.value = 'offline';
-        cityGroup.style.display = 'block';
-        document.getElementById('userCity').setAttribute('required', 'required');
-    }
-    
-    // Показываем модальное окно
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-// Функция закрытия формы
-function closeRegistrationForm() {
-    const modal = document.getElementById('registrationModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    
-    // Сбрасываем форму
-    document.getElementById('registrationForm').reset();
-    document.getElementById('successMessage').classList.remove('active');
-    document.getElementById('registrationForm').style.display = 'flex';
-}
-
-// Отправка формы
-function submitRegistration(event) {
-    event.preventDefault();
-    
     const form = document.getElementById('registrationForm');
-    const formData = new FormData(form);
-    const eventId = document.getElementById('eventId').value;
-    const eventType = document.getElementById('eventType').value;
+    const successMessage = document.getElementById('successMessage');
+    const offlineBtn = document.getElementById('offlineBtn');
+    const onlineBtn = document.getElementById('onlineBtn');
+    const modalClose = document.getElementById('modalClose');
     
-    // Собираем данные
-    const data = {
-        event_id: eventId,
-        event_type: eventType,
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        city: formData.get('city'),
-        message: formData.get('message')
-    };
-    
-    // Отправляем на сервер
-    fetch(`/api/event/${eventId}/register`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            // Показываем сообщение об успехе
-            form.style.display = 'none';
-            document.getElementById('successMessage').classList.add('active');
-            
-            // Закрываем модальное окно через 3 секунды
-            setTimeout(() => {
-                closeRegistrationForm();
-            }, 3000);
+    // Функция открытия модального окна
+    function showRegistrationForm(type) {
+        // Настраиваем форму в зависимости от типа
+        if (type === 'online') {
+            modalDescription.textContent = 'Заполните форму для участия в онлайн встрече';
+            eventType.value = 'online';
+            cityGroup.style.display = 'none';
+            document.getElementById('userCity').removeAttribute('required');
         } else {
-            alert('Произошла ошибка при регистрации. Попробуйте еще раз.');
+            modalDescription.textContent = 'Заполните форму для участия в офлайн встрече';
+            eventType.value = 'offline';
+            cityGroup.style.display = 'block';
+            document.getElementById('userCity').setAttribute('required', 'required');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка. Попробуйте еще раз позже.');
+        
+        // Показываем модальное окно
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Функция закрытия модального окна
+    function closeRegistrationForm() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Сбрасываем форму
+        form.reset();
+        successMessage.classList.remove('active');
+        form.style.display = 'flex';
+    }
+    
+    // Обработчики кнопок
+    if (offlineBtn) {
+        offlineBtn.addEventListener('click', function() {
+            showRegistrationForm('offline');
+        });
+    }
+    
+    if (onlineBtn) {
+        onlineBtn.addEventListener('click', function() {
+            showRegistrationForm('online');
+        });
+    }
+    
+    // Закрытие по кнопке X
+    modalClose.addEventListener('click', closeRegistrationForm);
+    
+    // Закрытие по клику вне модального окна
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeRegistrationForm();
+        }
     });
-}
-
-// Закрытие по клику вне модального окна
-document.getElementById('registrationModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeRegistrationForm();
-    }
-});
-
-// Закрытие по Escape
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeRegistrationForm();
-    }
+    
+    // Закрытие по Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeRegistrationForm();
+        }
+    });
+    
+    // Отправка формы
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const eventId = document.getElementById('eventId').value;
+        
+        // Собираем данные
+        const data = {
+            event_id: eventId,
+            event_type: eventType.value,
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            city: formData.get('city'),
+            message: formData.get('message')
+        };
+        
+        // Отправляем на сервер
+        fetch('/api/event/' + eventId + '/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            if (result.success) {
+                // Показываем сообщение об успехе
+                form.style.display = 'none';
+                successMessage.classList.add('active');
+                
+                // Закрываем модальное окно через 3 секунды
+                setTimeout(function() {
+                    closeRegistrationForm();
+                }, 3000);
+            } else {
+                alert('Произошла ошибка при регистрации. Попробуйте еще раз.');
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка. Попробуйте еще раз позже.');
+        });
+    });
 });
 </script>
 

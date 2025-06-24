@@ -9,6 +9,7 @@ app.secret_key = 'consilium-secret-key-2024'  # В продакшене испо
 
 # Путь к файлу для сохранения данных
 DATA_FILE = 'consilium_data.json'
+REGISTRATIONS_FILE = 'registrations.json'
 
 # Простая аутентификация для админки
 ADMIN_USERNAME = 'admin'
@@ -217,6 +218,60 @@ def event_detail(event_id):
                              similar_events=similar_events)
     return "Ивент не найден", 404
 
+# API для регистрации на событие
+@app.route('/api/event/<int:event_id>/register', methods=['POST'])
+def register_for_event(event_id):
+    try:
+        data = request.get_json()
+        
+        # Загружаем существующие регистрации
+        registrations = []
+        if os.path.exists(REGISTRATIONS_FILE):
+            with open(REGISTRATIONS_FILE, 'r', encoding='utf-8') as f:
+                registrations = json.load(f)
+        
+        # Создаем новую регистрацию
+        registration = {
+            'id': len(registrations) + 1,
+            'event_id': event_id,
+            'event_type': data.get('event_type'),
+            'name': data.get('name'),
+            'email': data.get('email'),
+            'phone': data.get('phone'),
+            'city': data.get('city'),
+            'message': data.get('message'),
+            'registered_at': datetime.now().isoformat()
+        }
+        
+        # Добавляем регистрацию
+        registrations.append(registration)
+        
+        # Сохраняем в файл
+        with open(REGISTRATIONS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(registrations, f, ensure_ascii=False, indent=2)
+        
+        # Обновляем количество участников события
+        event_data = load_data()
+        events = event_data.get('events', [])
+        for event in events:
+            if event['id'] == event_id:
+                event['participants'] = event.get('participants', 0) + 1
+                break
+        save_data(event_data)
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Регистрация успешно завершена',
+            'registration_id': registration['id']
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Registration error: {str(e)}')
+        return jsonify({
+            'success': False, 
+            'error': 'Произошла ошибка при регистрации'
+        }), 400
+
 # Административные маршруты
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -251,10 +306,17 @@ def admin_dashboard():
         if isinstance(event['event_date'], str):
             event['event_date'] = datetime.fromisoformat(event['event_date'])
     
+    # Загружаем регистрации
+    registrations = []
+    if os.path.exists(REGISTRATIONS_FILE):
+        with open(REGISTRATIONS_FILE, 'r', encoding='utf-8') as f:
+            registrations = json.load(f)
+    
     return render_template('admin/dashboard.html', 
                          events=events,
                          stats=data.get('stats', COMMUNITY_STATS),
-                         testimonials=data.get('testimonials', TESTIMONIALS))
+                         testimonials=data.get('testimonials', TESTIMONIALS),
+                         registrations=registrations)
 
 @app.route('/admin/events')
 @login_required
@@ -370,6 +432,28 @@ def admin_event_delete(event_id):
     
     flash('Ивент успешно удален', 'success')
     return redirect(url_for('admin_events'))
+
+@app.route('/admin/registrations')
+@login_required
+def admin_registrations():
+    # Загружаем регистрации
+    registrations = []
+    if os.path.exists(REGISTRATIONS_FILE):
+        with open(REGISTRATIONS_FILE, 'r', encoding='utf-8') as f:
+            registrations = json.load(f)
+    
+    # Загружаем события для отображения названий
+    data = load_data()
+    events = {e['id']: e for e in data.get('events', [])}
+    
+    # Добавляем информацию о событии к каждой регистрации
+    for reg in registrations:
+        event = events.get(reg['event_id'])
+        if event:
+            reg['event_title'] = event['post_text'][:50] + '...'
+            reg['event_author'] = event['author']
+    
+    return render_template('admin/registrations.html', registrations=registrations)
 
 @app.route('/admin/stats', methods=['GET', 'POST'])
 @login_required
